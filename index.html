@@ -1,0 +1,265 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spend Elon Musk's Money</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;background:#080808;color:white;
+ font-family:Arial,sans-serif;
+}
+header{
+ background:#111;padding:24px 15px;
+ text-align:center;border-bottom:2px solid #d4af37;
+}
+h1{color:#d4af37;margin:0;font-size:27px}
+header p{color:#aaa;margin-bottom:0}
+.hero{
+ text-align:center;padding:30px 15px;
+ background:linear-gradient(135deg,#17130a,#080808);
+}
+.hero h2{font-size:15px;color:#aaa}
+#balance{
+ font-size:clamp(30px,8vw,48px);
+ color:#d4af37;font-weight:900;
+ overflow-wrap:anywhere;
+}
+.stats{
+ display:flex;justify-content:center;
+ gap:12px;flex-wrap:wrap;padding:15px;
+}
+.stat{
+ background:#171717;border:1px solid #333;
+ padding:15px;border-radius:10px;
+ text-align:center;min-width:135px;
+}
+.stat strong{display:block;color:#d4af37;font-size:20px}
+h2.section{text-align:center;color:#d4af37}
+.filters{
+ display:flex;justify-content:center;gap:8px;
+ flex-wrap:wrap;padding:12px;
+}
+.filters button{
+ background:#222;color:white;border:1px solid #555;
+ padding:10px 13px;border-radius:20px;
+}
+.filters button.active{background:#d4af37;color:black}
+.grid{
+ display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));
+ gap:13px;padding:12px;max-width:1100px;margin:auto;
+}
+.card{
+ background:#171717;border:1px solid #393021;
+ border-radius:12px;padding:15px;text-align:center;
+}
+.emoji{font-size:43px;margin:8px}
+.card h3{font-size:16px;margin:8px 0;color:#eee}
+.price{color:#d4af37;font-weight:bold;margin:12px 0}
+.card button{
+ width:100%;padding:11px;border:0;border-radius:7px;
+ background:#d4af37;color:#080808;font-weight:bold;
+ margin:4px 0;cursor:pointer;
+}
+.card button:disabled{background:#555;color:#aaa}
+.card .sell{background:#333;color:white}
+#message{text-align:center;color:#d4af37;min-height:25px;padding:12px}
+.progress{
+ max-width:500px;margin:10px auto 25px;
+ padding:0 15px;
+}
+.track{height:13px;background:#333;border-radius:20px;overflow:hidden}
+#bar{height:100%;width:0%;background:#d4af37;transition:.3s}
+footer{text-align:center;padding:25px;color:#777}
+#win{
+ display:none;text-align:center;padding:35px 15px;
+ background:#29200b;border:2px solid #d4af37;margin:15px;
+ border-radius:12px;
+}
+#win h2{color:#d4af37;font-size:30px}
+.reset{
+ display:block;margin:15px auto 30px;padding:13px 25px;
+ background:#d4af37;border:0;border-radius:8px;
+ font-weight:bold;
+}
+</style>
+</head>
+<body>
+
+<header>
+<h1>👑 SPEND ELON MUSK'S MONEY</h1>
+<p>THE ULTIMATE BILLIONAIRE SPENDING GAME</p>
+</header>
+
+<div class="hero">
+<h2>YOUR AVAILABLE FORTUNE</h2>
+<div id="balance">$400,000,000,000</div>
+<p style="color:#aaa">You have 400 BILLION dollars. Spend it!</p>
+</div>
+
+<div class="stats">
+<div class="stat"><strong id="spent">$0</strong>Spent</div>
+<div class="stat"><strong id="bought">0</strong>Items bought</div>
+<div class="stat"><strong id="remaining">100%</strong>Money remaining</div>
+</div>
+
+<div class="progress">
+<p style="text-align:center;color:#aaa">SPENDING PROGRESS</p>
+<div class="track"><div id="bar"></div></div>
+</div>
+
+<div id="win">
+<h2>🏆 YOU DID IT!</h2>
+<p>YOU SPENT THE ENTIRE $400 BILLION!</p>
+<p>You are officially a spending legend.</p>
+</div>
+
+<h2 class="section">🛒 THE SHOP</h2>
+
+<div class="filters" id="filters">
+<button class="active" onclick="filter('All',this)">All</button>
+<button onclick="filter('Cars',this)">Cars</button>
+<button onclick="filter('Property',this)">Mansions</button>
+<button onclick="filter('Luxury',this)">Luxury</button>
+<button onclick="filter('Other',this)">Other</button>
+</div>
+
+<div class="grid" id="shop"></div>
+<div id="message">Choose something to buy!</div>
+
+<button class="reset" onclick="resetGame()">🔄 RESTART GAME</button>
+
+<footer>
+SPEND ELON MUSK'S MONEY © 2026<br>
+An unofficial billionaire spending simulator.
+</footer>
+
+<script>
+const START=400000000000;
+let balance=START;
+let spent=0;
+let bought=0;
+let inventory={};
+
+const items=[
+{name:"Lamborghini",emoji:"🏎️",price:500000,cat:"Cars"},
+{name:"Ferrari",emoji:"🏎️",price:600000,cat:"Cars"},
+{name:"Bugatti Chiron",emoji:"🚗",price:3000000,cat:"Cars"},
+{name:"McLaren",emoji:"🏎️",price:350000,cat:"Cars"},
+{name:"Private Jet",emoji:"✈️",price:75000000,cat:"Luxury"},
+{name:"Superyacht",emoji:"🛥️",price:150000000,cat:"Luxury"},
+{name:"Private Island",emoji:"🏝️",price:200000000,cat:"Property"},
+{name:"Luxury Mansion",emoji:"🏰",price:50000000,cat:"Property"},
+{name:"Skyscraper",emoji:"🏙️",price:1000000000,cat:"Property"},
+{name:"Football Club",emoji:"⚽",price:5000000000,cat:"Other"},
+{name:"Space Rocket",emoji:"🚀",price:1000000000,cat:"Other"},
+{name:"Diamond Collection",emoji:"💎",price:25000000,cat:"Luxury"},
+{name:"Luxury Watch",emoji:"⌚",price:1000000,cat:"Luxury"},
+{name:"Mega Shopping Mall",emoji:"🏬",price:500000000,cat:"Property"},
+{name:"Private Space Station",emoji:"🛰️",price:10000000000,cat:"Other"},
+{name:"Entire City",emoji:"🌆",price:25000000000,cat:"Other"},
+{name:"Luxury Hotel",emoji:"🏨",price:300000000,cat:"Property"},
+{name:"Supercar Collection",emoji:"🏁",price:100000000,cat:"Cars"}
+];
+
+let currentFilter="All";
+
+function money(n){
+ return "$"+Math.floor(n).toLocaleString("en-US");
+}
+
+function update(){
+ document.getElementById("balance").textContent=money(balance);
+ document.getElementById("spent").textContent=money(spent);
+ document.getElementById("bought").textContent=bought;
+ document.getElementById("remaining").textContent=
+ Math.round(balance/START*100)+"%";
+ document.getElementById("bar").style.width=
+ (spent/START*100)+"%";
+ document.getElementById("win").style.display=
+ balance===0?"block":"none";
+}
+
+function render(){
+ const shop=document.getElementById("shop");
+ shop.innerHTML="";
+ items.forEach((item,i)=>{
+ if(currentFilter!=="All"&&item.cat!==currentFilter)return;
+ const count=inventory[i]||0;
+ const card=document.createElement("div");
+ card.className="card";
+ const emoji=document.createElement("div");
+ emoji.className="emoji";
+ emoji.textContent=item.emoji;
+ const name=document.createElement("h3");
+ name.textContent=item.name;
+ const price=document.createElement("div");
+ price.className="price";
+ price.textContent=money(item.price);
+ const quantity=document.createElement("p");
+ quantity.style.color="#aaa";
+ quantity.textContent="Owned: "+count;
+ const buy=document.createElement("button");
+ buy.textContent="BUY";
+ buy.disabled=balance<item.price;
+ buy.onclick=()=>buyItem(i);
+ const sell=document.createElement("button");
+ sell.className="sell";
+ sell.textContent="SELL ONE";
+ sell.disabled=count===0;
+ sell.onclick=()=>sellItem(i);
+ card.append(emoji,name,price,quantity,buy,sell);
+ shop.appendChild(card);
+ });
+}
+
+function buyItem(i){
+ const item=items[i];
+ if(balance<item.price)return;
+ balance-=item.price;
+ spent+=item.price;
+ bought++;
+ inventory[i]=(inventory[i]||0)+1;
+ document.getElementById("message").textContent=
+ "You bought a "+item.name+"!";
+ update();render();
+}
+
+function sellItem(i){
+ const item=items[i];
+ if(!inventory[i])return;
+ inventory[i]--;
+ balance+=item.price;
+ spent-=item.price;
+ bought--;
+ document.getElementById("message").textContent=
+ "You sold a "+item.name+"!";
+ update();render();
+}
+
+function filter(category,button){
+ currentFilter=category;
+ document.querySelectorAll(".filters button").forEach(b=>
+ b.classList.remove("active"));
+ button.classList.add("active");
+ render();
+}
+
+function resetGame(){
+ if(!confirm("Restart and lose all your purchases?"))return;
+ balance=START;
+ spent=0;
+ bought=0;
+ inventory={};
+ document.getElementById("message").textContent=
+ "New game started! Spend wisely!";
+ update();render();
+}
+
+update();
+render();
+</script>
+</body>
+</html>
